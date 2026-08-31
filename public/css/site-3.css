@@ -1,0 +1,31 @@
+:root{
+  --ink:#0b1220;--ink-2:#121c2d;--ink-3:#1f2b3d;
+  --paper:#f7f9fc;--paper-2:#eef3f8;--paper-3:#e3eaf2;--white:#ffffff;
+  --muted:#667085;--muted-dark:#98a2b3;--signal:#1597f2;--signal-dark:#0875c9;
+  --line:#d8e0ea;--line-dark:#344054;--green:#2f7d4b;--amber:#a66b12;--red:#b42318;
+  --violet:#6f5cf6;--shadow:0 16px 46px rgba(15,23,42,.08);
+}
+body{background:var(--paper);color:var(--ink)}
+.site-header{background:rgba(255,255,255,.96);border-color:var(--line);box-shadow:0 1px 0 rgba(15,23,42,.02)}
+.patternwright-brand{display:inline-flex;align-items:center;padding:0;min-width:0}
+.patternwright-lockup{display:block;width:228px;height:auto;max-width:38vw;object-fit:contain}
+.desktop-nav a{color:#475467}
+.desktop-nav a:hover{color:var(--ink)}
+.nav-cta,.button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.nav-cta:hover,.button.primary:hover{background:#17233a;border-color:#17233a}
+.status-dot{background:var(--signal)}
+.eyebrow,.section-kicker,.workflow-head p,.step-no{color:#167fc6}
+.workflow-visual,.modeler-shell,.roi-card,.fit-card{border-color:#cfd9e6}
+.live-pill{background:#edf7ff;border-color:#b9ddfa;color:#126fae}
+.flow-node.ai,.gen-step.ai,.generated-step.ai{border-color:#9fd0f3;background:#f4faff}
+.flow-node.ai .node-icon,.gen-step.ai .step-no,.generated-step.ai .step-no{color:#0d79bd}
+.form-note a,.text-link,.panel-link{color:#0b75bd}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#56aee8;box-shadow:0 0 0 3px rgba(21,151,242,.10)}
+.mobile-nav-strip{background:#fff;border-color:var(--line)}
+.mobile-nav-inner a:active{color:var(--signal)}
+.site-footer{background:#0b1220}
+.patternwright-footer-brand{display:inline-flex;background:#fff;border-radius:4px;padding:6px 8px}
+.footer-lockup{width:190px;max-width:60vw}
+::selection{background:#1597f2;color:#fff}
+@media(max-width:720px){.patternwright-lockup{width:192px;max-width:62vw}.footer-lockup{width:168px}}
+@media(max-width:390px){.patternwright-lockup{width:176px;max-width:66vw}}
