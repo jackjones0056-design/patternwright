@@ -28,27 +28,18 @@ CREATE TABLE IF NOT EXISTS enrichment_jobs(id TEXT PRIMARY KEY,company_id TEXT,s
 CREATE TABLE IF NOT EXISTS audit_events(id INTEGER PRIMARY KEY AUTOINCREMENT,entity_type TEXT,entity_id TEXT,event TEXT NOT NULL,detail_json TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL);
 `);
 db.prepare('INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)').run('schema_version',String(SCHEMA_VERSION));
-function loadAtlasSeed(){
-  const source=readFileSync(join(PUBLIC,'js','os-core.js'),'utf8');
-  const marker='const ATLAS=';
-  const start=source.indexOf(marker);
-  if(start<0) throw new Error('Atlas seed not found in public/js/os-core.js');
-  let i=start+marker.length, depth=0, inString=false, escaped=false, end=-1;
-  for(;i<source.length;i++){
-    const ch=source[i];
-    if(inString){
-      if(escaped) escaped=false;
-      else if(ch==='\\') escaped=true;
-      else if(ch==='"') inString=false;
-      continue;
-    }
-    if(ch==='"'){inString=true;continue}
-    if(ch==='[') depth++;
-    else if(ch===']' && --depth===0){end=i+1;break}
-  }
-  if(end<0) throw new Error('Atlas seed array is malformed');
-  return JSON.parse(source.slice(start+marker.length,end));
+function parseAtlasPart(file,marker){
+  const source=readFileSync(join(PUBLIC,'js',file),'utf8');
+  const start=source.indexOf(marker); if(start<0) throw new Error(`Atlas seed marker missing in ${file}`);
+  const a=source.indexOf('[',start), b=source.lastIndexOf(']');
+  if(a<0||b<a) throw new Error(`Atlas seed malformed in ${file}`);
+  return JSON.parse(source.slice(a,b+1));
 }
+function loadAtlasSeed(){ return [
+  ...parseAtlasPart('atlas-data-1.js','const ATLAS_PART_1='),
+  ...parseAtlasPart('atlas-data-2.js','const ATLAS_PART_2='),
+  ...parseAtlasPart('atlas-data-3.js','const ATLAS_PART_3=')
+];}
 const atlasSeed=loadAtlasSeed();
 const atlasCount=db.prepare('SELECT count(*) n FROM atlas_profiles').get().n;
 if(!atlasCount){const ins=db.prepare('INSERT INTO atlas_profiles(id,name,category,location,score,primary_opportunity,profile_json,updated_at) VALUES(?,?,?,?,?,?,?,?)');const now=new Date().toISOString();db.exec('BEGIN');try{for(const p of atlasSeed)ins.run(p.id,p.name,p.category||'',p.location||'',p.score||null,p.primaryOpportunity||'',JSON.stringify(p),now);db.exec('COMMIT')}catch(e){db.exec('ROLLBACK');throw e}}
@@ -69,9 +60,7 @@ function serializeState(){const leads=db.prepare('SELECT * FROM leads ORDER BY c
 function replaceState(s){const ts=now();db.exec('BEGIN');try{db.exec('DELETE FROM discovery; DELETE FROM proposals; DELETE FROM projects; DELETE FROM leads; DELETE FROM settings;');for(const l of s.leads||[]){const atlas=l.atlasId?atlasById(l.atlasId):null;const cid=companyFor(l.business||'Unnamed business',l.business_type||atlas?.category||'',atlas?.location||'',l.atlasId||null);db.prepare('INSERT INTO leads(id,company_id,contact_name,email,phone,business_type,pain,frequency,software,stage,score,estimated_value,source,atlas_id,discovery_status,created_at,updated_at,payload_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(l.id||id('L'),cid,l.name||'',l.email||'',l.phone||'',l.business_type||'',l.pain||'',l.frequency||'',l.software||'',l.stage||'New',l.score??null,Number(l.estimatedValue||950),l.source||'',l.atlasId||null,l.discoveryStatus||null,l.createdAt||ts,ts,JSON.stringify(l));}for(const [leadId,d] of Object.entries(s.discovery||{}))db.prepare('INSERT INTO discovery(lead_id,notes,saved_at,validated_at,brief_json) VALUES(?,?,?,?,?)').run(leadId,d.notes||'',d.savedAt||null,d.validatedAt||null,JSON.stringify(d));for(const p of s.proposals||[])db.prepare('INSERT INTO proposals(id,lead_id,business,text,price,created_at,payload_json) VALUES(?,?,?,?,?,?,?)').run(p.id||id('P'),p.leadId||null,p.business||'',p.text||'',Number(p.price||0),p.createdAt||ts,JSON.stringify(p));for(const p of s.projects||[])db.prepare('INSERT INTO projects(id,lead_id,business,progress,tasks_json,created_at,updated_at,payload_json) VALUES(?,?,?,?,?,?,?,?)').run(p.id||id('PR'),p.leadId||null,p.business||'',Number(p.progress||0),JSON.stringify(p.tasks||[]),p.createdAt||ts,ts,JSON.stringify(p));for(const [k,v] of Object.entries(s.settings||{}))db.prepare('INSERT INTO settings(key,value_json) VALUES(?,?)').run(k,JSON.stringify({value:v}));db.exec('COMMIT');audit('workspace','global','state_sync',{leads:(s.leads||[]).length})}catch(e){db.exec('ROLLBACK');throw e}}
 function staticFile(req,res,pathname){
   if(pathname==='/os'){
-    const shell=readFileSync(join(PUBLIC,'os.html'),'utf8');
-    const atlas=readFileSync(join(PUBLIC,'fragments','atlas-1.html'),'utf8')+readFileSync(join(PUBLIC,'fragments','atlas-2.html'),'utf8');
-    const body=shell.replace('<!--PATTERNWRIGHT_ATLAS-->',atlas);
+    const body=readFileSync(join(PUBLIC,'os.html'),'utf8');
     res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin'});
     res.end(body);return true;
   }

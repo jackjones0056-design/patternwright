@@ -1,0 +1,34 @@
+function renderProjects(){const h=$('#projects');h.innerHTML=state.projects.length?state.projects.map(p=>`<article class="card project"><div class="project-head"><div><strong>${esc(p.business)}</strong><p class="muted">${p.progress||0}% complete</p></div><span class="status ${p.progress===100?'good':'warn'}">${p.progress===100?'Complete':'Active'}</span></div><div class="progress"><span style="width:${p.progress||0}%"></span></div><div class="tasks">${p.tasks.map((t,i)=>`<button class="task ${t.done?'done':''}" data-project="${p.id}" data-task="${i}">${esc(t.name)}</button>`).join('')}</div></article>`).join(''):'<div class="empty">No active projects.</div>';$$('.task').forEach(b=>b.addEventListener('click',()=>{const p=state.projects.find(x=>x.id===b.dataset.project);if(!p)return;const t=p.tasks[+b.dataset.task];t.done=!t.done;p.progress=Math.round(p.tasks.filter(x=>x.done).length/p.tasks.length*100);save();renderProjects();renderDashboard()}))}
+function renderAgents(){$('#agents').innerHTML=AGENTS.map((a,i)=>`<article class="card agent"><span class="code">${esc(a.code)}</span><h3>${esc(a.name)}</h3><p>${esc(a.job)}</p><button class="btn small prepare-agent" data-agent="${i}" type="button">Prepare handoff</button></article>`).join('');$$('.prepare-agent').forEach(b=>b.addEventListener('click',()=>{const l=leadById($('#agent-lead').value);if(!l)return toast('Select a lead');const a=AGENTS[+b.dataset.agent],d=buildDiscovery(l),notes=state.discovery[l.id]?.notes||'None captured';const prompt=`ROLE: ${a.name}
+MISSION: ${a.job}
+
+CLIENT CONTEXT
+Business: ${l.business}
+Business type: ${l.business_type||''}
+Workflow pain: ${l.pain||''}
+Opportunity score: ${l.score??'Not scored'}
+Discovery status: ${l.discoveryStatus||'Not validated'}
+Pattern: ${d.pattern}
+Metric: ${d.metric}
+Human control: ${d.control}
+Discovery notes: ${notes}
+
+RULES
+- Do not invent client facts.
+- Separate verified evidence from assumptions.
+- Minimize data collection and access.
+- Preserve human approval for consequential actions.
+- Recommend the smallest useful workflow before expansion.`;$('#agent-prompt').value=prompt}))}$('#copy-agent').addEventListener('click',()=>{const t=$('#agent-prompt').value;if(!t)return toast('Prepare a handoff first');copyText(t).then(()=>toast('Handoff copied'))});
+function renderTemplates(){$('#templates').innerHTML=TEMPLATES.map((t,i)=>`<article class="card template"><span class="fit">${esc(t.fit)}</span><h3>${esc(t.title)}</h3><p><strong>Trigger:</strong> ${esc(t.trigger)}</p><p><strong>Flow:</strong> ${esc(t.flow)}</p><p><strong>Metric:</strong> ${esc(t.metric)}</p><p><strong>Control:</strong> ${esc(t.risk)}</p><button class="btn small copy-template" data-i="${i}" type="button">Copy pattern</button></article>`).join('');$$('.copy-template').forEach(b=>b.addEventListener('click',()=>{const t=TEMPLATES[+b.dataset.i];copyText(`${t.title}
+Trigger: ${t.trigger}
+Flow: ${t.flow}
+Metric: ${t.metric}
+Control: ${t.risk}`).then(()=>toast('Pattern copied'))}))}
+$('#atlas-search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();$$('[data-atlas-card]').forEach(c=>{const r=atlasById(c.dataset.atlasCard),txt=`${r.name} ${r.category} ${r.location} ${(r.issues||[]).map(x=>x.title).join(' ')} ${(r.hypotheses||[]).map(x=>x.title).join(' ')}`.toLowerCase();c.style.display=!q||txt.includes(q)?'block':'none'})});$$('.atlas-to-discovery').forEach(b=>b.addEventListener('click',()=>{const r=atlasById(b.dataset.atlasId);const l=leadFromAtlas(r);refreshLeadSelects();$('#discovery-lead').value=l.id;composeDiscovery(l.id);location.hash='section-discovery';toast(`${r.name} moved to Discovery`)}));
+$('#settings-form').addEventListener('submit',e=>{e.preventDefault();state.settings=Object.fromEntries(new FormData(e.target).entries());save();toast('Settings saved')});function fillSettings(){const f=$('#settings-form');Object.entries(state.settings||{}).forEach(([k,v])=>{if(f.elements[k])f.elements[k].value=v});$('#storage-status').textContent=HAS_STORAGE?'Browser fallback storage is available.':'Restricted preview detected: browser persistence is unavailable; use the backend or export before closing.';if(backendAvailable)setBackendStatus(true)}
+$('#export-data').addEventListener('click',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify((()=>{const x={version:2.1,exportedAt:new Date().toISOString(),...state,settings:{...(state.settings||{})}};delete x.settings.adminKey;return x})(),null,2)],{type:'application/json'}));a.download=`patternwright-os-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Export prepared')});$('#import-data').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);state={leads:d.leads||[],projects:d.projects||[],proposals:d.proposals||[],discovery:d.discovery||{},settings:d.settings||{}};save();refreshAll();toast('Import complete')}catch(err){toast('Invalid JSON')}};fr.readAsText(file)});$('#clear-data').addEventListener('click',()=>{if(confirm('Clear Patternwright OS local data?')){state={leads:[],projects:[],proposals:[],discovery:{},settings:{}};save();refreshAll();toast('Local data cleared')}});
+$('#seed-demo').addEventListener('click',()=>{const demo=[{id:'L-DEMO1',stage:'Qualified',score:87,estimatedValue:950,name:'Jordan',business:'Bayline Roofing',business_type:'Roofing contractor',pain:'Web leads are copied manually into the CRM and estimator follow-up is inconsistent.',frequency:'25–40/week',software:'Gmail, website form, CRM'},{id:'L-DEMO2',stage:'Proposed',score:78,estimatedValue:950,name:'Morgan',business:'Magnolia Property Services',business_type:'Property management',pain:'Maintenance requests arrive through email and text and are manually categorized and assigned.',frequency:'60/week',software:'Gmail, spreadsheet'},{id:'L-DEMO3',stage:'New',score:null,estimatedValue:950,name:'Taylor',business:'Northside Electric',business_type:'Electrical contractor',pain:'Completed jobs do not consistently trigger review requests and estimate follow-up.',frequency:'15/week',software:'Job management app, Gmail'}];for(const d of demo)if(!state.leads.some(l=>l.id===d.id))state.leads.push({...d,createdAt:new Date().toISOString()});save();refreshAll();toast('Demo data loaded')});
+$('#sync-now').addEventListener('click',async()=>{await pushRemoteState();if(backendAvailable)toast('Synced to backend');});
+function refreshAll(){renderDashboard();renderPipeline();renderProjects();renderAgents();renderTemplates();refreshLeadSelects();fillSettings();const active=$('.os-section.active')?.id.replace('section-','')||'dashboard';showSection(active)}
+refreshAll();
+hydrateRemoteState();
