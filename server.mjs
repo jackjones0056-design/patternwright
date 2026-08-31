@@ -28,7 +28,28 @@ CREATE TABLE IF NOT EXISTS enrichment_jobs(id TEXT PRIMARY KEY,company_id TEXT,s
 CREATE TABLE IF NOT EXISTS audit_events(id INTEGER PRIMARY KEY AUTOINCREMENT,entity_type TEXT,entity_id TEXT,event TEXT NOT NULL,detail_json TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL);
 `);
 db.prepare('INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)').run('schema_version',String(SCHEMA_VERSION));
-const atlasSeed=JSON.parse(readFileSync(join(DATA,'atlas.json'),'utf8'));
+function loadAtlasSeed(){
+  const source=readFileSync(join(PUBLIC,'js','os-core.js'),'utf8');
+  const marker='const ATLAS=';
+  const start=source.indexOf(marker);
+  if(start<0) throw new Error('Atlas seed not found in public/js/os-core.js');
+  let i=start+marker.length, depth=0, inString=false, escaped=false, end=-1;
+  for(;i<source.length;i++){
+    const ch=source[i];
+    if(inString){
+      if(escaped) escaped=false;
+      else if(ch==='\\') escaped=true;
+      else if(ch==='"') inString=false;
+      continue;
+    }
+    if(ch==='"'){inString=true;continue}
+    if(ch==='[') depth++;
+    else if(ch===']' && --depth===0){end=i+1;break}
+  }
+  if(end<0) throw new Error('Atlas seed array is malformed');
+  return JSON.parse(source.slice(start+marker.length,end));
+}
+const atlasSeed=loadAtlasSeed();
 const atlasCount=db.prepare('SELECT count(*) n FROM atlas_profiles').get().n;
 if(!atlasCount){const ins=db.prepare('INSERT INTO atlas_profiles(id,name,category,location,score,primary_opportunity,profile_json,updated_at) VALUES(?,?,?,?,?,?,?,?)');const now=new Date().toISOString();db.exec('BEGIN');try{for(const p of atlasSeed)ins.run(p.id,p.name,p.category||'',p.location||'',p.score||null,p.primaryOpportunity||'',JSON.stringify(p),now);db.exec('COMMIT')}catch(e){db.exec('ROLLBACK');throw e}}
 function now(){return new Date().toISOString()}
@@ -46,7 +67,20 @@ function reasoning(input){const lead=input.lead||input;const atlas=input.atlasId
 const pattern=inferPattern(`${lead.business_type||''} ${lead.pain||''}`);return {provider:'rules-v1',evidence:[],issues:[{title:lead.pain||'Workflow friction needs validation',detail:'Submitted by the prospect; validate the current-state process before proposing automation.',confidence:'medium'}],pattern,metric:'Handling time + completion rate',control:'Human approval for pricing, commitments, exceptions, and consequential customer-facing actions',questions:['Walk me through the process from trigger to completion.','Where is information copied or re-entered?','What gets delayed, forgotten, or escalated to the owner?','Which decisions must remain human?','What metric would prove the workflow improved?'],hypotheses:[]}}
 function serializeState(){const leads=db.prepare('SELECT * FROM leads ORDER BY created_at DESC').all().map(r=>({...json(r.payload_json),id:r.id,createdAt:r.created_at,stage:r.stage,score:r.score,estimatedValue:r.estimated_value,name:r.contact_name||'',email:r.email||'',phone:r.phone||'',business_type:r.business_type||'',pain:r.pain||'',frequency:r.frequency||'',software:r.software||'',source:r.source||'',atlasId:r.atlas_id||undefined,discoveryStatus:r.discovery_status||undefined,business:json(r.payload_json).business||db.prepare('SELECT display_name FROM companies WHERE id=?').get(r.company_id)?.display_name||''}));const discovery={};for(const r of db.prepare('SELECT * FROM discovery').all())discovery[r.lead_id]={...json(r.brief_json),notes:r.notes||'',savedAt:r.saved_at||undefined,validatedAt:r.validated_at||undefined};const proposals=db.prepare('SELECT * FROM proposals ORDER BY created_at').all().map(r=>({...json(r.payload_json),id:r.id,leadId:r.lead_id,business:r.business,text:r.text,price:r.price,createdAt:r.created_at}));const projects=db.prepare('SELECT * FROM projects ORDER BY created_at').all().map(r=>({...json(r.payload_json),id:r.id,leadId:r.lead_id,business:r.business,progress:r.progress,tasks:json(r.tasks_json),createdAt:r.created_at}));const settings={};for(const r of db.prepare('SELECT * FROM settings').all())settings[r.key]=json(r.value_json).value;return {version:2.1,leads,projects,proposals,discovery,settings}}
 function replaceState(s){const ts=now();db.exec('BEGIN');try{db.exec('DELETE FROM discovery; DELETE FROM proposals; DELETE FROM projects; DELETE FROM leads; DELETE FROM settings;');for(const l of s.leads||[]){const atlas=l.atlasId?atlasById(l.atlasId):null;const cid=companyFor(l.business||'Unnamed business',l.business_type||atlas?.category||'',atlas?.location||'',l.atlasId||null);db.prepare('INSERT INTO leads(id,company_id,contact_name,email,phone,business_type,pain,frequency,software,stage,score,estimated_value,source,atlas_id,discovery_status,created_at,updated_at,payload_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(l.id||id('L'),cid,l.name||'',l.email||'',l.phone||'',l.business_type||'',l.pain||'',l.frequency||'',l.software||'',l.stage||'New',l.score??null,Number(l.estimatedValue||950),l.source||'',l.atlasId||null,l.discoveryStatus||null,l.createdAt||ts,ts,JSON.stringify(l));}for(const [leadId,d] of Object.entries(s.discovery||{}))db.prepare('INSERT INTO discovery(lead_id,notes,saved_at,validated_at,brief_json) VALUES(?,?,?,?,?)').run(leadId,d.notes||'',d.savedAt||null,d.validatedAt||null,JSON.stringify(d));for(const p of s.proposals||[])db.prepare('INSERT INTO proposals(id,lead_id,business,text,price,created_at,payload_json) VALUES(?,?,?,?,?,?,?)').run(p.id||id('P'),p.leadId||null,p.business||'',p.text||'',Number(p.price||0),p.createdAt||ts,JSON.stringify(p));for(const p of s.projects||[])db.prepare('INSERT INTO projects(id,lead_id,business,progress,tasks_json,created_at,updated_at,payload_json) VALUES(?,?,?,?,?,?,?,?)').run(p.id||id('PR'),p.leadId||null,p.business||'',Number(p.progress||0),JSON.stringify(p.tasks||[]),p.createdAt||ts,ts,JSON.stringify(p));for(const [k,v] of Object.entries(s.settings||{}))db.prepare('INSERT INTO settings(key,value_json) VALUES(?,?)').run(k,JSON.stringify({value:v}));db.exec('COMMIT');audit('workspace','global','state_sync',{leads:(s.leads||[]).length})}catch(e){db.exec('ROLLBACK');throw e}}
-function staticFile(req,res,pathname){let target=pathname==='/'?join(PUBLIC,'index.html'):pathname==='/os'?join(PUBLIC,'os.html'):join(PUBLIC,normalize(pathname).replace(/^([/\\])+/,''));target=resolve(target);if(!target.startsWith(resolve(PUBLIC))||!existsSync(target))return false;const types={'.html':'text/html; charset=utf-8','.png':'image/png','.svg':'image/svg+xml','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8'};res.writeHead(200,{'content-type':types[extname(target)]||'application/octet-stream','cache-control':extname(target)==='.html'?'no-store':'public, max-age=3600','x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin'});res.end(readFileSync(target));return true}
+function staticFile(req,res,pathname){
+  if(pathname==='/os'){
+    const shell=readFileSync(join(PUBLIC,'os.html'),'utf8');
+    const atlas=readFileSync(join(PUBLIC,'fragments','atlas-1.html'),'utf8')+readFileSync(join(PUBLIC,'fragments','atlas-2.html'),'utf8');
+    const body=shell.replace('<!--PATTERNWRIGHT_ATLAS-->',atlas);
+    res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin'});
+    res.end(body);return true;
+  }
+  let target=pathname==='/'?join(PUBLIC,'index.html'):join(PUBLIC,normalize(pathname).replace(/^([/\\])+/,''));target=resolve(target);
+  if(!target.startsWith(resolve(PUBLIC))||!existsSync(target))return false;
+  const types={'.html':'text/html; charset=utf-8','.png':'image/png','.svg':'image/svg+xml','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8'};
+  res.writeHead(200,{'content-type':types[extname(target)]||'application/octet-stream','cache-control':extname(target)==='.html'?'no-store':'public, max-age=3600','x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin'});
+  res.end(readFileSync(target));return true
+}
 const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url,`http://${req.headers.host||'localhost'}`);const p=u.pathname;if(p.startsWith('/api/') && p!='/api/fit-checks' && !requireAdmin(req))return reply(res,401,{error:'Admin key required'});
 if(req.method==='GET'&&p==='/api/health')return reply(res,200,{ok:true,product:'Patternwright Production Core',schemaVersion:SCHEMA_VERSION,db:DB_PATH,atlasProfiles:db.prepare('SELECT count(*) n FROM atlas_profiles').get().n,time:now()});
 if(req.method==='POST'&&p==='/api/fit-checks'){const d=await body(req);if(!String(d.business||'').trim()||!String(d.email||'').trim()||!String(d.pain||'').trim())return reply(res,400,{error:'business, email, and pain are required'});const atlas=atlasByName(String(d.business).trim());const cid=companyFor(String(d.business).trim(),d.business_type||atlas?.category||'',atlas?.location||'',atlas?.id||null);const lid=id('L'),ts=now();const payload={...d,business:String(d.business).trim()};db.prepare('INSERT INTO leads(id,company_id,contact_name,email,phone,business_type,pain,frequency,software,stage,score,estimated_value,source,atlas_id,discovery_status,created_at,updated_at,payload_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(lid,cid,d.name||'',d.email||'',d.phone||'',d.business_type||'',d.pain||'',d.frequency||'',d.software||'','New',null,950,d.source||'Website Fit Check',atlas?.id||null,'Not validated',d.submittedAt||ts,ts,JSON.stringify(payload));const r=reasoning({lead:{...payload,business_type:d.business_type||'',pain:d.pain||'',atlasId:atlas?.id},atlasId:atlas?.id});db.prepare('INSERT OR REPLACE INTO discovery(lead_id,notes,saved_at,validated_at,brief_json) VALUES(?,?,?,?,?)').run(lid,'',ts,null,JSON.stringify({preDiscovery:r,source:'Fit Check'}));audit('lead',lid,'fit_check_received',{business:d.business});return reply(res,201,{ok:true,leadId:lid,companyId:cid,atlasId:atlas?.id||null,preDiscovery:r});}
