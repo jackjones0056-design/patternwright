@@ -1,0 +1,52 @@
+/* Mobile */
+@media (max-width:900px){
+  .container{width:min(calc(100% - 34px),var(--max))}
+  .menu-button{display:block}
+  #nav-links{display:none;position:absolute;left:17px;right:17px;top:60px;background:var(--surface);border:1px solid var(--line);padding:12px;box-shadow:var(--shadow)}
+  #nav-links.open{display:grid;gap:4px}#nav-links>a{padding:9px 8px}.nav{height:60px}
+  .hero{padding:70px 0 50px}.hero-grid,.split-heading,.gen-top,.offer-head,.roi-grid,.contact-grid,.faq-grid{grid-template-columns:1fr;gap:34px}.hero-grid{gap:42px}.hero h1{font-size:clamp(3rem,12vw,4.4rem)}
+  .proof-row{grid-template-columns:1fr;gap:9px}
+  .trust-grid{grid-template-columns:1fr}.trust-grid>div{border-right:0;border-bottom:1px solid var(--line-dark);padding:15px 0}.trust-grid>div:last-child{border-bottom:0}
+  .usecase-row{grid-template-columns:36px 1fr;gap:12px 16px}.usecase-row>p,.case-outcome{grid-column:2}.case-outcome{justify-self:start}
+  .gen-output{grid-template-columns:1fr}.gen-canvas{border-right:0;border-bottom:1px solid var(--line)}.gen-prompt-row{grid-template-columns:1fr}.gen-flow{grid-template-columns:1fr 1fr;gap:8px}
+  .offer-grid{grid-template-columns:1fr}.sprint-card{grid-template-columns:1fr;gap:24px;padding:26px}
+  .method-rail{grid-template-columns:1fr 1fr}.method-item{min-height:135px;border-bottom:1px solid var(--line)}
+  .field-row{grid-template-columns:1fr}.controls-grid{grid-template-columns:1fr}.control-point:nth-child(odd){border-right:0}.control-point:nth-child(even){padding-left:0}
+  .footer-top,.footer-bottom{grid-template-columns:1fr;gap:12px}.footer-bottom span:nth-child(3){text-align:left}
+}
+@media (max-width:560px){
+  .section,.gen-section,.offer-section{padding:68px 0}.container{width:min(calc(100% - 28px),var(--max))}
+  .hero h1{font-size:2.9rem}.hero-copy{font-size:.94rem}.workflow-foot{grid-template-columns:1fr}.workflow-foot>div{border-right:0;border-bottom:1px solid var(--line)}.workflow-foot>div:last-child{border-bottom:0}
+  .flow-split{grid-template-columns:1fr;gap:0}.gen-flow{grid-template-columns:1fr}.method-rail{grid-template-columns:1fr}.method-item{min-height:auto;gap:24px}.fit-proof{display:grid;gap:8px}
+}
+
+/* Mobile navigation: persistent links, no disclosure or JavaScript dependency */
+#desktop-nav{display:flex;align-items:center;gap:26px}
+#desktop-nav>a{font-size:.78rem;color:#3f4240;font-weight:600}
+#desktop-nav>a:hover{color:var(--signal)}
+#desktop-nav .nav-cta{padding:10px 13px;background:var(--ink);color:#fff;border:1px solid var(--ink)}
+#desktop-nav .nav-cta:hover{background:var(--signal);border-color:var(--signal);color:#fff}
+.mobile-nav-strip{display:none}
+@media (max-width:900px){
+  #desktop-nav,.menu-button,#nav-links,.mobile-nav{display:none!important}
+  .site-header .nav{height:58px;min-height:58px}
+  .mobile-nav-strip{display:block;border-top:1px solid var(--line);background:var(--surface)}
+  .mobile-nav-inner{display:flex;align-items:center;gap:22px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .mobile-nav-inner::-webkit-scrollbar{display:none}
+  .mobile-nav-inner a{flex:0 0 auto;padding:10px 0 9px;font-size:.71rem;font-weight:700;color:#555954;letter-spacing:.01em}
+  .mobile-nav-inner a:active{color:var(--signal)}
+  .mobile-nav-inner .mobile-fit-link{margin-left:auto;color:var(--ink)}
+}
+
+/* v1.6.4 brand lockup */
+.site-header .brand{color:var(--ink)}
+.site-header .brand .brand-word{color:var(--ink)}
+.brand{gap:11px;font-weight:760;letter-spacing:.055em}
+.brand-word{font-size:.86rem;line-height:1;letter-spacing:.16em}
+.brand-mark{display:inline-flex;width:30px;height:22px;align-items:center;justify-content:center;flex:0 0 30px;color:var(--ink)}
+.brand-mark svg{display:block;width:100%;height:100%;overflow:visible}
+.brand-mark .mark-frame,.brand-mark .mark-accent{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:square;stroke-linejoin:miter;vector-effect:non-scaling-stroke}
+.brand-mark .mark-accent{stroke:var(--signal);stroke-width:1.9}
+.footer-brand{color:#fff}
+.footer-brand .brand-mark{color:#fff}
+@media(max-width:640px){.brand{gap:9px}.brand-word{font-size:.8rem;letter-spacing:.14em}.brand-mark{width:27px;height:20px;flex-basis:27px}}
