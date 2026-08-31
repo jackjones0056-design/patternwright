@@ -1,8 +1,6 @@
 # Patternwright v2.1 — Production Core
 
-Patternwright is a local-first business systems and automation platform for workflow discovery, Atlas intelligence, qualification, proposals, projects, and AI-assisted consulting operations.
-
-This repository turns the Patternwright prototype into a working client/server system with persistent SQLite data and no external runtime dependencies.
+This package turns the Patternwright prototype into a working local client/server system with persistent SQLite data and no external runtime dependencies.
 
 ## Run
 
@@ -36,10 +34,10 @@ Do not submit or store sensitive, regulated, medical, financial-account, or gove
 
 ## Repository layout
 
-- `public/index.html` — customer-facing Patternwright site
-- `public/os.html` — Patternwright OS
-- `standalone/` — app-safe standalone builds
-- `assets/` — Patternwright logo assets
+- `public/index.html` — customer-facing Patternwright shell
+- `public/os.html` — Patternwright OS shell
+- `public/css/` + `public/js/` — production UI assets
+- `public/fragments/` — server-injected Atlas no-JS fallback
+- `public/assets/` — Patternwright logo assets
 - `server.mjs` — Node/SQLite production-core server
-- `data/atlas.json` — seeded Atlas company profiles
-- `data/` — runtime SQLite database files are ignored by Git
+- `data/` — runtime SQLite data (ignored by Git)
