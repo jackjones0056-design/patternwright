@@ -1,14 +1,18 @@
 # Patternwright v2.1 — Production Core
 
-This package turns the Patternwright prototype into a working local client/server system with persistent SQLite data and no external runtime dependencies.
+Zero-dependency Node + SQLite system for Patternwright customer site and OS.
 
-## Run
+## Run locally
 
 Requires Node.js 22.5+ (Node 24 is ideal).
 
 ```bash
-npm start
+cp .env.example .env
+# set PATTERNWRIGHT_ADMIN_PASSWORD and PATTERNWRIGHT_SESSION_SECRET for auth
+node server.mjs
 ```
+
+Or use the start script from package.json.
 
 Open:
 - Customer site: http://127.0.0.1:8787/
@@ -16,28 +20,43 @@ Open:
 
 The first run creates `data/patternwright.db`.
 
+## Authentication (deploy-ready)
+
+Session login is the primary protection for OS / admin / mutating APIs:
+
+1. Set `PATTERNWRIGHT_ADMIN_USER` (default `admin`)
+2. Set `PATTERNWRIGHT_ADMIN_PASSWORD` (or `PATTERNWRIGHT_ADMIN_PASSWORD_HASH`)
+3. Set `PATTERNWRIGHT_SESSION_SECRET` (required when `NODE_ENV=production`)
+
+Sign in at `/os`. Cookies are HttpOnly + SameSite=Lax (+ Secure behind HTTPS). Mutating session requests require `x-csrf-token`.
+
+Optional: `PATTERNWRIGHT_ADMIN_KEY` remains an automation fallback via `x-patternwright-key`.
+
+Public `POST /api/fit-checks` stays open and rate-limited.
+
+## Deploy
+
+See [DEPLOY.md](./DEPLOY.md) for Docker Compose and single-VM runbooks, env var list, SQLite volume persistence, verification checklist, and rollback notes.
+
 ## What is live
 
-- Public Fit Check POSTs directly into SQLite when served by this server.
-- Patternwright OS hydrates from the same backend.
-- OS changes debounce-sync back to SQLite.
-- Atlas has 11 seeded profiles in the backend and the app-safe HTML fallback.
-- Discovery can call `/api/reason` for evidence-separated deterministic reasoning.
-- Atlas enrichment jobs can be queued for a future enrichment provider.
-- Full JSON import/export and standalone/local fallback remain intact.
+- Public Fit Check POSTs into SQLite when served by this server
+- Patternwright OS hydrates from the same backend (after sign-in when auth is enabled)
+- OS changes debounce-sync back to SQLite
+- Atlas has 11 seeded profiles
+- Discovery can call `/api/reason` for evidence-separated deterministic reasoning
+- Full JSON import/export and standalone/local fallback remain intact
 
 ## Security boundary
 
-This is a production-core baseline, not an internet-hardened multi-user SaaS. Before exposing it publicly, put it behind HTTPS and authentication. Set `PATTERNWRIGHT_ADMIN_KEY` to require an admin key for OS API routes; the public `/api/fit-checks` endpoint intentionally remains open.
-
 Do not submit or store sensitive, regulated, medical, financial-account, or government nonpublic data.
+
+Before public exposure: HTTPS, session auth env vars, and the DEPLOY.md checklist.
 
 ## Repository layout
 
-- `public/index.html` — customer-facing Patternwright shell
-- `public/os.html` — Patternwright OS shell
-- `public/css/` + `public/js/` — production UI assets
-- `public/fragments/` — server-injected Atlas no-JS fallback
-- `public/assets/` — Patternwright logo assets
+- `public/` — customer site + OS assets
 - `server.mjs` — Node/SQLite production-core server
+- `scripts/smoke.mjs` — local API verification harness
+- `Dockerfile` + `docker-compose.yml` — container deploy path
 - `data/` — runtime SQLite data (ignored by Git)

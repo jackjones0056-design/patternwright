@@ -1,12 +1,13 @@
 {
   "name": "patternwright",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "description": "Patternwright Production Core — business systems, Atlas intelligence, discovery, proposals, projects, and local-first AI workflow consulting operations.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check server.mjs"
+    "check": "node --check server.mjs && node --check scripts/smoke.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "engines": {
     "node": ">=22.5"
