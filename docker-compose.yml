@@ -1,0 +1,24 @@
+services:
+  patternwright:
+    build: .
+    image: patternwright:2.1
+    ports:
+      - "8787:8787"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 8787
+      PATTERNWRIGHT_DB: /data/patternwright.db
+      PATTERNWRIGHT_TRUST_PROXY: "true"
+      PATTERNWRIGHT_SECURE_COOKIES: "true"
+      PATTERNWRIGHT_ADMIN_USER: ${PATTERNWRIGHT_ADMIN_USER:-admin}
+      PATTERNWRIGHT_ADMIN_PASSWORD: ${PATTERNWRIGHT_ADMIN_PASSWORD}
+      PATTERNWRIGHT_ADMIN_PASSWORD_HASH: ${PATTERNWRIGHT_ADMIN_PASSWORD_HASH:-}
+      PATTERNWRIGHT_SESSION_SECRET: ${PATTERNWRIGHT_SESSION_SECRET}
+      PATTERNWRIGHT_ADMIN_KEY: ${PATTERNWRIGHT_ADMIN_KEY:-}
+    volumes:
+      - patternwright-data:/data
+    restart: unless-stopped
+
+volumes:
+  patternwright-data:
