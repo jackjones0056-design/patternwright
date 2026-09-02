@@ -100,10 +100,21 @@ async function main(){
   if(r.status!==201)fail(`fit-check ${r.status}`);
   const fit=await r.json();
   if(!fit.leadId)fail('fit-check missing leadId');
+  if(fit.preDiscovery||fit.atlasId||fit.companyId)fail('fit-check leaked non-ack fields');
 
   r=await fetch(`${base}/api/state`,{headers:{cookie}});
   const state=await r.json();
   if(!state.leads?.some(l=>l.id===fit.leadId))fail('fit-check lead not in state');
+
+  // logout without CSRF should fail while session cookie is present
+  r=await fetch(`${base}/api/auth/logout`,{method:'POST',headers:{cookie,'content-type':'application/json'},body:'{}'});
+  if(r.status!==403)fail(`expected logout CSRF 403, got ${r.status}`);
+
+  r=await fetch(`${base}/api/auth/logout`,{method:'POST',headers:{cookie,'content-type':'application/json','x-csrf-token':login.csrfToken},body:'{}'});
+  if(!r.ok)fail(`logout failed ${r.status}`);
+
+  r=await fetch(`${base}/api/state`,{headers:{cookie}});
+  if(r.status!==401)fail(`expected 401 after logout, got ${r.status}`);
 
   // headers present
   r=await fetch(`${base}/api/health`);

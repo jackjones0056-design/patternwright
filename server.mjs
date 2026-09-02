@@ -51,12 +51,16 @@ if(ADMIN_PASSWORD_HASH){
 }
 const AUTH_ENABLED=!!passwordVerifier;
 const SESSION_ENABLED=AUTH_ENABLED||!!ADMIN_KEY;
+if(IS_PROD&&!SESSION_ENABLED){
+  console.error('FATAL: Refusing to start in production with no auth configured. Set PATTERNWRIGHT_ADMIN_PASSWORD, PATTERNWRIGHT_ADMIN_PASSWORD_HASH, or PATTERNWRIGHT_ADMIN_KEY.');
+  process.exit(1);
+}
 if(AUTH_ENABLED&&!SESSION_SECRET){
   if(IS_PROD){
     console.error('FATAL: PATTERNWRIGHT_SESSION_SECRET is required when admin password auth is enabled in production.');
     process.exit(1);
   }
-  console.warn('WARN: PATTERNWRIGHT_SESSION_SECRET not set; generating ephemeral secret (sessions reset on restart).');
+  console.warn('WARN: PATTERNWRIGHT_SESSION_SECRET not set; generating ephemeral secret for log fingerprint only (SQLite sessions are unaffected).');
 }
 const effectiveSessionSecret=SESSION_SECRET||randomBytes(32).toString('hex');
 
@@ -203,6 +207,7 @@ function getSession(sid){
   return row;
 }
 function destroySession(sid){if(sid)db.prepare('DELETE FROM sessions WHERE id=?').run(sid)}
+function revokeAllSessions(){return db.prepare('DELETE FROM sessions').run().changes||0}
 function hashSecretFingerprint(){
   return createHash('sha256').update(effectiveSessionSecret).digest('hex').slice(0,12);
 }
@@ -463,11 +468,27 @@ const server=http.createServer(async(req,res)=>{
 
     if(method==='POST'&&p==='/api/auth/logout'){
       const cookies=parseCookies(req);
-      destroySession(cookies.pw_session);
+      const session=getSession(cookies.pw_session);
+      if(session){
+        if(!originAllowed(req))return reply(res,403,{error:'Invalid origin'},{},req);
+        if(!requireCsrf(req,session))return reply(res,403,{error:'CSRF token required'},{},req);
+        destroySession(session.id);
+        audit('auth',session.username,'logout',{ip});
+      }
       const secure=isSecureRequest(req);
       return reply(res,200,{ok:true},{
         'set-cookie':clearCookieHeader('pw_session',{secure})
       },req);
+    }
+
+    if(method==='POST'&&p==='/api/auth/sessions/revoke-all'){
+      const auth=requireAuth(req,res,{mutating:true});
+      if(!auth)return;
+      const cleared=revokeAllSessions();
+      audit('auth',auth.user||'unknown','sessions_revoked',{cleared,ip});
+      const secure=isSecureRequest(req);
+      const headers=auth.via==='session'?{'set-cookie':clearCookieHeader('pw_session',{secure})}:{};
+      return reply(res,200,{ok:true,cleared},headers,req);
     }
 
     if(method==='GET'&&p==='/api/auth/me'){
@@ -508,7 +529,8 @@ const server=http.createServer(async(req,res)=>{
       db.prepare('INSERT OR REPLACE INTO discovery(lead_id,notes,saved_at,validated_at,brief_json) VALUES(?,?,?,?,?)')
         .run(lid,'',ts,null,JSON.stringify({preDiscovery:r,source:'Fit Check'}));
       audit('lead',lid,'fit_check_received',{business:d.business});
-      return reply(res,201,{ok:true,leadId:lid,companyId:cid,atlasId:atlas?.id||null,preDiscovery:r},{},req);
+      // Public response is ack-only; atlas/preDiscovery stay server-side for OS operators.
+      return reply(res,201,{ok:true,leadId:lid},{},req);
     }
 
     if(p.startsWith('/api/')&&!PUBLIC_API.has(p)){
