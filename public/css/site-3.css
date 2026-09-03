@@ -8,7 +8,7 @@
 body{background:var(--paper);color:var(--ink)}
 .site-header{background:rgba(255,255,255,.96);border-color:var(--line);box-shadow:0 1px 0 rgba(15,23,42,.02)}
 .patternwright-brand{display:inline-flex;align-items:center;padding:0;min-width:0}
-.patternwright-lockup{display:block;width:228px;height:auto;max-width:38vw;object-fit:contain}
+.patternwright-lockup{display:block;width:200px;height:auto;max-width:38vw;object-fit:contain}
 .desktop-nav a{color:#475467}
 .desktop-nav a:hover{color:var(--ink)}
 .nav-cta,.button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
@@ -25,7 +25,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:#56aee8;box-sh
 .mobile-nav-inner a:active{color:var(--signal)}
 .site-footer{background:#0b1220}
 .patternwright-footer-brand{display:inline-flex;background:#fff;border-radius:4px;padding:6px 8px}
-.footer-lockup{width:190px;max-width:60vw}
+.footer-lockup{width:160px;max-width:60vw}
 ::selection{background:#1597f2;color:#fff}
-@media(max-width:720px){.patternwright-lockup{width:192px;max-width:62vw}.footer-lockup{width:168px}}
-@media(max-width:390px){.patternwright-lockup{width:176px;max-width:66vw}}
+@media(max-width:720px){.patternwright-lockup{width:180px;max-width:62vw}.footer-lockup{width:148px}}
+@media(max-width:390px){.patternwright-lockup{width:168px;max-width:66vw}}
