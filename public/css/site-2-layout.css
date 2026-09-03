@@ -50,3 +50,17 @@
 .faq-section{background:var(--surface)}
 .faq-grid{display:grid;grid-template-columns:.45fr 1.55fr;gap:80px}.faq-list{border-top:1px solid var(--ink)}.faq-list details{border-bottom:1px solid var(--line)}.faq-list summary{list-style:none;display:flex;justify-content:space-between;gap:20px;cursor:pointer;padding:18px 0;font-size:.84rem;font-weight:700}.faq-list summary::-webkit-details-marker{display:none}.faq-list summary span{color:#8b8d87}.faq-list details[open] summary span{transform:rotate(45deg)}.faq-list p{max-width:680px;margin:0 0 18px;color:var(--muted);font-size:.78rem;line-height:1.65}
 footer{background:#111314;color:#fff;padding:42px 0 22px;border-top:1px solid #2f3334}.footer-top{display:grid;grid-template-columns:1fr 1fr auto;gap:30px;align-items:center;padding-bottom:32px}.footer-top p{color:#7f8582;font-size:.78rem}.footer-cta{font-size:.75rem;border-bottom:1px solid #5d6260;padding-bottom:2px}.footer-bottom{padding-top:16px;border-top:1px solid #2b2f30;display:grid;grid-template-columns:auto auto 1fr auto;gap:20px;color:#5f6562;font-family:inherit;font-size:.54rem;text-transform:uppercase;letter-spacing:.05em}.footer-bottom span:nth-child(3){text-align:center}
+
+/* Website builds offering */
+.websites-section{background:var(--paper);border-top:1px solid var(--line)}
+.websites-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);margin-bottom:28px}
+.website-card{padding:22px 20px 24px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-height:220px}
+.website-card:last-child{border-right:0}
+.website-card h3{margin:0;font-size:.95rem;letter-spacing:-.02em}
+.website-card>p{margin:0;flex:1;color:var(--muted);font-size:.78rem;line-height:1.6}
+.website-card .case-outcome{margin-top:auto;justify-self:start}
+.website-card .case-outcome small{display:block;color:#999b96;text-transform:uppercase;letter-spacing:.06em;font-size:.53rem}
+.website-card .case-outcome strong{font-size:.75rem}
+.websites-cta-bar{display:flex;justify-content:space-between;align-items:center;gap:28px;padding:22px 0 0;border-top:1px solid var(--line)}
+.websites-cta-bar strong{display:block;font-size:.88rem;letter-spacing:-.02em;margin-bottom:4px}
+.websites-cta-bar span{display:block;color:var(--muted);font-size:.76rem;line-height:1.55;max-width:640px}
