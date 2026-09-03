@@ -2,6 +2,8 @@
 
 Zero-dependency Node + SQLite system for Patternwright customer site and OS.
 
+**Product positioning:** AI integration and workflows are the core (ops OS, Fit Check, Atlas, discovery, automation for businesses). Website builds for Gulf Coast / South Mississippi local businesses — redesigns, booking/quote CTAs — are an explicit secondary offering on the public site, not a replacement for the workflow product.
+
 ## Run locally
 
 Requires Node.js 22.5+ (Node 24 is ideal).
@@ -40,6 +42,7 @@ See [DEPLOY.md](./DEPLOY.md) for Docker Compose and single-VM runbooks, env var 
 
 ## What is live
 
+- Public marketing site: AI workflows primary; Website builds section for local business sites / redesigns / booking CTAs
 - Public Fit Check POSTs into SQLite when served by this server
 - Patternwright OS hydrates from the same backend (after sign-in when auth is enabled)
 - OS changes debounce-sync back to SQLite

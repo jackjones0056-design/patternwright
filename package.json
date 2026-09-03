@@ -2,7 +2,7 @@
   "name": "patternwright",
   "version": "2.1.1",
   "private": true,
-  "description": "Patternwright Production Core — business systems, Atlas intelligence, discovery, proposals, projects, and local-first AI workflow consulting operations.",
+  "description": "Patternwright Production Core — AI workflows and business systems (Fit Check, Atlas, discovery, automation), plus website builds for Gulf Coast local businesses.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
