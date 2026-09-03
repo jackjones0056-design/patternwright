@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hidden Gem Salon | Biloxi, MS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --sand: #f7f1ea;
+      --cream: #fffaf5;
+      --ink: #1c1714;
+      --muted: #6b5e55;
+      --blush: #c97b84;
+      --blush-deep: #a85a64;
+      --gold: #b8956c;
+      --sea: #3d6b7a;
+      --card: #ffffff;
+      --shadow: 0 12px 40px rgba(28, 23, 20, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--sand);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .serif { font-family: "Cormorant Garamond", Georgia, serif; }
+
+    /* Top bar */
+    header {
+      position: sticky; top: 0; z-index: 40;
+      backdrop-filter: blur(12px);
+      background: rgba(247, 241, 234, 0.88);
+      border-bottom: 1px solid rgba(28, 23, 20, 0.06);
+    }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 0; gap: 1rem;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 0.65rem;
+      font-weight: 600; letter-spacing: 0.02em;
+    }
+    .brand-mark {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blush), var(--gold));
+      box-shadow: 0 4px 14px rgba(201, 123, 132, 0.35);
+    }
+    .brand span { font-size: 0.95rem; }
+    .nav-links { display: none; gap: 1.25rem; color: var(--muted); font-size: 0.9rem; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.4rem; border: 0; cursor: pointer;
+      border-radius: 999px; padding: 0.8rem 1.35rem;
+      font: inherit; font-weight: 600; font-size: 0.92rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary {
+      background: var(--ink); color: var(--cream);
+      box-shadow: 0 8px 24px rgba(28, 23, 20, 0.18);
+    }
+    .btn-primary:hover { background: #2a221d; }
+    .btn-soft {
+      background: rgba(201, 123, 132, 0.14); color: var(--blush-deep);
+    }
+    .btn-outline {
+      background: transparent; color: var(--ink);
+      border: 1px solid rgba(28, 23, 20, 0.18);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 2rem 0 3rem;
+      display: grid; gap: 1.75rem;
+    }
+    .hero-copy { max-width: 34rem; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--sea); margin-bottom: 0.85rem;
+    }
+    .eyebrow::before {
+      content: ""; width: 1.4rem; height: 2px; background: var(--gold);
+    }
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2.4rem, 8vw, 3.6rem);
+      line-height: 1.08; font-weight: 600; margin-bottom: 0.9rem;
+    }
+    .lede { color: var(--muted); font-size: 1.05rem; margin-bottom: 1.4rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+    .trust {
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem;
+      margin-top: 1.35rem; color: var(--muted); font-size: 0.86rem;
+    }
+    .trust strong { color: var(--ink); font-weight: 600; }
+
+    .hero-visual {
+      position: relative; border-radius: calc(var(--radius) + 6px);
+      overflow: hidden; min-height: 320px;
+      background:
+        linear-gradient(160deg, rgba(28, 23, 20, 0.15), rgba(61, 107, 122, 0.25)),
+        radial-gradient(circle at 20% 20%, #f0c9c4 0%, transparent 45%),
+        radial-gradient(circle at 80% 10%, #d8c4a8 0%, transparent 40%),
+        linear-gradient(180deg, #e8d5c8, #9fb8c0 55%, #3d6b7a);
+      box-shadow: var(--shadow);
+    }
+    .hero-visual::after {
+      content: ""; position: absolute; inset: 0;
+      background: url("https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80") center/cover no-repeat;
+      opacity: 0.55; mix-blend-mode: soft-light;
+    }
+    .hero-badge {
+      position: absolute; left: 1rem; bottom: 1rem; z-index: 2;
+      background: rgba(255, 250, 245, 0.92); backdrop-filter: blur(8px);
+      border-radius: 14px; padding: 0.85rem 1rem; max-width: 16rem;
+      box-shadow: var(--shadow);
+    }
+    .hero-badge p { font-size: 0.82rem; color: var(--muted); }
+    .hero-badge strong { display: block; font-size: 0.95rem; margin-bottom: 0.15rem; color: var(--ink); }
+
+    /* Sections */
+    section { padding: 2.5rem 0; }
+    .section-head { margin-bottom: 1.5rem; max-width: 36rem; }
+    .section-head h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.9rem, 5vw, 2.5rem); font-weight: 600; margin-bottom: 0.45rem;
+    }
+    .section-head p { color: var(--muted); }
+
+    .services {
+      display: grid; gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 1.25rem; box-shadow: var(--shadow);
+      border: 1px solid rgba(28, 23, 20, 0.04);
+    }
+    .card-icon {
+      width: 42px; height: 42px; border-radius: 12px; margin-bottom: 0.9rem;
+      background: linear-gradient(135deg, rgba(201,123,132,.2), rgba(184,149,108,.25));
+      display: grid; place-items: center; font-size: 1.15rem;
+    }
+    .card h3 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.45rem; font-weight: 600; margin-bottom: 0.35rem;
+    }
+    .card p { color: var(--muted); font-size: 0.95rem; }
+    .card .meta {
+      margin-top: 0.9rem; display: flex; justify-content: space-between;
+      align-items: center; font-size: 0.85rem; color: var(--sea); font-weight: 600;
+    }
+
+    /* Why / upgrade strip */
+    .upgrade {
+      background: linear-gradient(135deg, #1c1714, #2f3f46);
+      color: var(--cream); border-radius: calc(var(--radius) + 4px);
+      padding: 1.6rem; box-shadow: var(--shadow);
+    }
+    .upgrade h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.85rem; margin-bottom: 0.55rem;
+    }
+    .upgrade p { color: rgba(255,250,245,0.78); margin-bottom: 1rem; max-width: 40rem; }
+    .upgrade ul {
+      list-style: none; display: grid; gap: 0.55rem; margin-bottom: 1.25rem;
+    }
+    .upgrade li {
+      display: flex; gap: 0.55rem; align-items: flex-start;
+      font-size: 0.95rem; color: rgba(255,250,245,0.9);
+    }
+    .upgrade li::before {
+      content: "✓"; color: #e6c39a; font-weight: 700; margin-top: 0.05rem;
+    }
+
+    /* Gallery strip */
+    .gallery {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+    }
+    .tile {
+      border-radius: 14px; min-height: 140px; overflow: hidden; position: relative;
+      box-shadow: var(--shadow);
+    }
+    .tile:nth-child(1) {
+      background:
+        linear-gradient(180deg, transparent, rgba(28,23,20,.35)),
+        url("https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80") center/cover;
+      grid-column: 1 / -1; min-height: 200px;
+    }
+    .tile:nth-child(2) {
+      background: linear-gradient(145deg, #d9b8b2, #8fa9b3);
+    }
+    .tile:nth-child(3) {
+      background: linear-gradient(145deg, #c9b39a, #6d8a8f);
+    }
+    .tile span {
+      position: absolute; left: 0.8rem; bottom: 0.75rem;
+      color: white; font-size: 0.8rem; font-weight: 600;
+      text-shadow: 0 1px 8px rgba(0,0,0,.35);
+    }
+
+    /* Book CTA */
+    .book {
+      background: var(--cream); border-radius: calc(var(--radius) + 4px);
+      padding: 1.75rem 1.35rem; text-align: center;
+      border: 1px solid rgba(184, 149, 108, 0.25);
+      box-shadow: var(--shadow);
+    }
+    .book h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.9rem, 5vw, 2.4rem); margin-bottom: 0.45rem;
+    }
+    .book p { color: var(--muted); margin-bottom: 1.2rem; }
+    .book-form {
+      display: grid; gap: 0.7rem; max-width: 26rem; margin: 0 auto 0.75rem;
+      text-align: left;
+    }
+    label { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+    input, select {
+      width: 100%; margin-top: 0.3rem; border-radius: 12px;
+      border: 1px solid rgba(28,23,20,0.12); background: white;
+      padding: 0.75rem 0.9rem; font: inherit; color: var(--ink);
+    }
+    .book .btn { width: 100%; max-width: 26rem; }
+    .fine { font-size: 0.78rem; color: var(--muted); margin-top: 0.75rem; }
+
+    footer {
+      padding: 2rem 0 2.5rem; color: var(--muted); font-size: 0.82rem;
+      border-top: 1px solid rgba(28,23,20,0.06); margin-top: 1rem;
+    }
+    .footer-inner {
+      display: flex; flex-direction: column; gap: 0.65rem;
+    }
+    .footer-brand { font-weight: 600; color: var(--ink); }
+    .concept {
+      margin-top: 0.35rem; padding-top: 0.85rem;
+      border-top: 1px dashed rgba(28,23,20,0.12);
+      font-size: 0.75rem; color: #8a7d74;
+    }
+
+    @media (min-width: 720px) {
+      .nav-links { display: flex; }
+      .hero {
+        grid-template-columns: 1.05fr 0.95fr;
+        align-items: center; padding: 3rem 0 3.5rem;
+      }
+      .hero-visual { min-height: 420px; }
+      .services { grid-template-columns: repeat(3, 1fr); }
+      .gallery { grid-template-columns: 1.4fr 1fr 1fr; }
+      .tile:nth-child(1) { grid-column: auto; min-height: 220px; }
+      .footer-inner { flex-direction: row; justify-content: space-between; align-items: flex-end; }
+      .book { padding: 2.25rem; }
+      .book-form { grid-template-columns: 1fr 1fr; }
+      .book-form .full { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="#top" aria-label="Hidden Gem Salon home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Hidden Gem Salon</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#services">Services</a>
+        <a href="#look">The vibe</a>
+        <a href="#book">Book</a>
+      </nav>
+      <a class="btn btn-primary" href="#book">Book appointment</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="wrap hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Biloxi · Gulf Coast beauty</p>
+        <h1>Your neighborhood gem, dressed for the coast.</h1>
+        <p class="lede">
+          Soft glam, clean cuts, and calm chairs — a salon site that feels as polished
+          as the work in the chair, not just a booking link.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#book">Book your chair</a>
+          <a class="btn btn-soft" href="#services">View services</a>
+        </div>
+        <div class="trust">
+          <span><strong>Biloxi local</strong> · by appointment</span>
+          <span><strong>Premium look</strong> beyond booking-only apps</span>
+        </div>
+      </div>
+      <div class="hero-visual" role="img" aria-label="Soft salon atmosphere with coastal light">
+        <div class="hero-badge">
+          <strong>More than a booking page</strong>
+          <p>A brand home that earns trust before they tap “Book.”</p>
+        </div>
+      </div>
+    </div>
+
+    <section id="services">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Services that feel intentional</h2>
+          <p>Signature work for Gulf Coast clients who want clarity, calm, and results.</p>
+        </div>
+        <div class="services">
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">✦</div>
+            <h3>Cut & style</h3>
+            <p>Precision cuts and wearable finish for humidity-proof days on the coast.</p>
+            <div class="meta"><span>From consult</span><span>45–75 min</span></div>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">◎</div>
+            <h3>Color & gloss</h3>
+            <p>Soft lived-in color, brightening gloss, and tone work that photographs beautifully.</p>
+            <div class="meta"><span>Custom quote</span><span>90+ min</span></div>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">✧</div>
+            <h3>Events & bridal</h3>
+            <p>Polished looks for beach weddings, galas, and weekend getaways along the shore.</p>
+            <div class="meta"><span>Trial available</span><span>On request</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="upgrade">
+          <h2>Ready when GlossGenius isn’t enough</h2>
+          <p>
+            Booking apps get you on the calendar. A real site gives Hidden Gem a front door —
+            story, services, proof, and a book CTA that feels premium on every phone.
+          </p>
+          <ul>
+            <li>Mobile-first landing that looks intentional — not template-default</li>
+            <li>Clear services + Gulf Coast vibe visitors can feel in one scroll</li>
+            <li>One-tap book path that still sends them to your preferred scheduler</li>
+          </ul>
+          <a class="btn btn-soft" href="#book" style="background:#fff;color:#1c1714;">See the book experience</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="look">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Gulf Coast soft glam</h2>
+          <p>Warm sand tones, sea glass accents, and quiet luxury — placeholder gallery energy.</p>
+        </div>
+        <div class="gallery" aria-label="Mood gallery">
+          <div class="tile"><span>Chair & calm</span></div>
+          <div class="tile"><span>Coast light</span></div>
+          <div class="tile"><span>Soft finish</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="book">
+      <div class="wrap">
+        <div class="book">
+          <h2>Reserve your chair</h2>
+          <p>Tell us what you need — we’ll confirm availability and next steps.</p>
+          <form class="book-form" action="#" method="get" onsubmit="event.preventDefault(); alert('Concept mock — booking would route to your scheduler.');">
+            <div class="full">
+              <label for="name">Name</label>
+              <input id="name" name="name" placeholder="Alex Rivera" autocomplete="name" />
+            </div>
+            <div>
+              <label for="service">Service</label>
+              <select id="service" name="service">
+                <option>Cut & style</option>
+                <option>Color & gloss</option>
+                <option>Events / bridal</option>
+                <option>Not sure — consult</option>
+              </select>
+            </div>
+            <div>
+              <label for="when">Preferred day</label>
+              <input id="when" name="when" type="date" />
+            </div>
+            <div class="full">
+              <label for="note">Note (optional)</label>
+              <input id="note" name="note" placeholder="First visit, length goals, etc." />
+            </div>
+            <div class="full">
+              <button class="btn btn-primary" type="submit">Request appointment</button>
+            </div>
+          </form>
+          <p class="fine">Demo form only — wires to GlossGenius, Square, or your preferred booker.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div>
+        <div class="footer-brand">Hidden Gem Salon · Biloxi</div>
+        <div>Gulf Coast appointments · Concept brand home</div>
+      </div>
+      <div>© 2026 Hidden Gem Salon (placeholder)</div>
+    </div>
+    <div class="wrap concept">Concept mock for discussion — Patternwright</div>
+  </footer>
+</body>
+</html>
